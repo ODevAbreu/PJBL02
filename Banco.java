@@ -3,14 +3,15 @@ import java.util.List;
 
 public class Banco {
     String nome;
-    ArrayList<Usuario> Usuarios;
-
+    ArrayList<Usuario> usuarios;
+    ArrayList<Conta> contas;
 
     public Banco(String nome) {
         this.nome = nome;
-        this.Usuarios = new ArrayList<Usuario>();
+        this.contas = new ArrayList<Conta>();
     }
 }
+
 class Usuario{
     private String nome;
     private String cpf;
@@ -26,14 +27,47 @@ class Usuario{
         this.conta = new ArrayList<>();
     }
 }
-abstract class Conta {
-    private String numeroConta;
-    private String senha;
-    protected double saldo;
 
-    public Conta(String numeroConta, Usuario usuario, String senha) {
-        this.numeroConta = numeroConta;
+abstract class Conta{
+    private int numeroDaConta;
+    private String senha;
+    private double saldo;
+
+    public Conta( int numeroDaConta , String senha , double saldo ){
+        this.numeroDaConta =  numeroDaConta;
         this.senha = senha;
-        this.saldo = 0.0;
+        this.saldo = 0.0 ;
     }
+
+    public abstract boolean sacar(double valor);
+}
+
+class ContaCorrente extends Conta{
+    public ContaCorrente(int numeroDaconta , String senha , double saldo){
+        super(numeroDaconta, senha , saldo );
+    }
+
+    @Override
+    public boolean sacar(double valor) {
+        if (valor <= saldo) {
+            saldo -= valor;
+            return true;
+        }
+        return false;
+    }
+}
+}
+
+class ContaPoupanca extends Conta{
+    public ContaPoupanca(int numeroDaconta , String senha , double saldo ){
+        super(numeroDaconta, senha , saldo );
+    }
+    @Override
+    public boolean sacar(double valor) {
+        if (valor <= saldo) {
+            saldo -= valor;
+            return true;
+        }
+        return false;
+}
 }
