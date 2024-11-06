@@ -31,7 +31,7 @@ class Usuario{
 abstract class Conta{
     private int numeroDaConta;
     private String senha;
-    private double saldo;
+    protected double saldo;
 
     public Conta( int numeroDaConta , String senha , double saldo ){
         this.numeroDaConta =  numeroDaConta;
@@ -56,7 +56,7 @@ class ContaCorrente extends Conta{
         return false;
     }
 }
-}
+
 
 class ContaPoupanca extends Conta{
     public ContaPoupanca(int numeroDaconta , String senha , double saldo ){
