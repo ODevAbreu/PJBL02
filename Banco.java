@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Date;
 
 
 public class Banco {
@@ -10,6 +9,14 @@ public class Banco {
         this.nome = nome;
         this.contas = new ArrayList<ContaBancaria>();
     }
+    public ContaBancaria buscarConta(int numeroDaConta, String senha) {
+        for (ContaBancaria conta : contas) {
+            if (conta.getNumeroDaConta() == numeroDaConta && conta.validarSenha(senha)) {
+                return conta;
+            }
+        }
+        return null;
+    }
 }
 
 abstract class ContaBancaria{
@@ -18,20 +25,19 @@ abstract class ContaBancaria{
     protected double saldo;
     private String nome;
     private String cpf;
-    private String login;
-    private Date DataNasc;
 
-    public ContaBancaria( int numeroDaConta , String senha , double saldo, String nome, String cpf, String login, Date DataNasc ){
+
+    public ContaBancaria( int numeroDaConta , String senha , double saldo, String nome, String cpf ){
         this.numeroDaConta =  numeroDaConta;
-        this.senha = senha;
         this.saldo = saldo ;
         this.nome = nome;
         this.cpf = cpf;
-        this.login = login;
         this.senha = senha;
-        this.DataNasc = DataNasc;
+        // tipo conta para verificar se a conta é pj ou pf
     }
-
+    public int getNumeroDaConta() {return numeroDaConta;}
+    public String getNome() {return nome;}
+    public double getSaldo() {return saldo;}
     public boolean validarSenha(String senha) {
         return this.senha.equals(senha);
     }
@@ -42,8 +48,8 @@ abstract class ContaBancaria{
 class ContaBancariaPF extends ContaBancaria{
     private String cpf;
 
-    public ContaBancariaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf, String login, Date DataNasc) {
-        super(numeroDaConta, senha, saldo, nome, cpf, login, DataNasc);
+    public ContaBancariaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf ) {
+        super(numeroDaConta, senha, saldo, nome, cpf);
     }
 
     @Override
@@ -54,8 +60,8 @@ class ContaBancariaPF extends ContaBancaria{
 class ContaBancariaPJ extends ContaBancaria{
     private String cnpj;
 
-    public ContaBancariaPJ(int numeroDaConta, String senha, double saldo, String nome, String cpf, String login, Date DataNasc) {
-        super(numeroDaConta, senha, saldo, nome, cpf, login, DataNasc);
+    public ContaBancariaPJ(int numeroDaConta, String senha, double saldo, String nome, String cnpj) {
+        super(numeroDaConta, senha, saldo, nome, cnpj);
     }
 
     @Override
@@ -65,8 +71,8 @@ class ContaBancariaPJ extends ContaBancaria{
 }
 class ContaCorrentePF extends ContaBancariaPF{
 
-    public ContaCorrentePF(int numeroDaConta, String senha, double saldo, String nome, String cpf, String login, Date DataNasc) {
-        super(numeroDaConta, senha, saldo, nome, cpf, login, DataNasc);
+    public ContaCorrentePF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
+        super(numeroDaConta, senha, saldo, nome, cpf);
     }
 
     @Override
@@ -78,12 +84,12 @@ class ContaCorrentePF extends ContaBancariaPF{
         return false;
     }
 }
-}
+
 
 class ContaPoupancaPF extends ContaBancariaPF {
 
-    public ContaPoupancaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf, String login, Date DataNasc) {
-        super(numeroDaConta, senha, saldo, nome, cpf, login, DataNasc);
+    public ContaPoupancaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
+        super(numeroDaConta, senha, saldo, nome, cpf);
     }
 
     @Override
@@ -98,8 +104,8 @@ class ContaPoupancaPF extends ContaBancariaPF {
 class ContaCorrentePJ extends ContaBancariaPJ{
 
 
-    public ContaCorrentePJ(int numeroDaConta, String senha, double saldo, String nome, String cpf, String login, Date DataNasc) {
-        super(numeroDaConta, senha, saldo, nome, cpf, login, DataNasc);
+    public ContaCorrentePJ(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
+        super(numeroDaConta, senha, saldo, nome, cpf);
     }
 
     @Override
@@ -110,12 +116,11 @@ class ContaCorrentePJ extends ContaBancariaPJ{
         }
         return false;
     }
-}
 }
 
 class ContaPoupancaPJ extends ContaBancariaPJ{
-    public ContaPoupancaPJ(int numeroDaConta, String senha, double saldo, String nome, String cpf, String login, Date DataNasc) {
-        super(numeroDaConta, senha, saldo, nome, cpf, login, DataNasc);
+    public ContaPoupancaPJ(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
+        super(numeroDaConta, senha, saldo, nome, cpf);
     }
 
     @Override
@@ -127,3 +132,4 @@ class ContaPoupancaPJ extends ContaBancariaPJ{
         return false;
     }
 }
+

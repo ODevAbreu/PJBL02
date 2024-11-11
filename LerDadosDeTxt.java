@@ -4,23 +4,31 @@ import java.io.IOException;
 
 public class LerDadosDeTxt {
 
-    public static void main(String[] args) {
-        // O caminho do arquivo onde os dados foram armazenados
-        String caminhoArquivo = "dados.txt";
-
-        // Chama o método para ler os dados do arquivo
-        lerDadosDoArquivo(caminhoArquivo);
-    }
-
-    // Método para ler dados do arquivo
-    public static void lerDadosDoArquivo(String caminhoArquivo) {
-        // Tenta abrir o arquivo e ler seu conteúdo
+    public static void lerDadosDoArquivo(String caminhoArquivo, Banco banco) {
         try (BufferedReader reader = new BufferedReader(new FileReader(caminhoArquivo))) {
             String linha;
 
-            // Lê linha por linha até o final do arquivo
             while ((linha = reader.readLine()) != null) {
-                System.out.println(linha); // Exibe a linha lida
+                String[] partes = linha.split("\\|");
+
+                if (partes.length >= 6) {
+                    String tipoConta = partes[0].trim();
+                    int numConta = Integer.parseInt(partes[1].trim());
+                    String senha = partes[2].trim();
+                    double saldo = Double.parseDouble(partes[3].trim());
+                    String nome = partes[4].trim();
+                    String cpfOuCnpj = partes[5].trim();
+
+                    ContaBancaria conta = null;
+                    if ("F".equals(tipoConta)) {
+                        conta = new ContaCorrentePF(numConta, senha, saldo, nome, cpfOuCnpj);
+                    } else if ("J".equals(tipoConta)) {
+                        conta = new ContaCorrentePJ(numConta, senha, saldo, nome, cpfOuCnpj);
+                    }
+                    if (conta != null) {
+                            banco.contas.add(conta);
+                    }
+                }
             }
         } catch (IOException e) {
             System.err.println("Erro ao ler o arquivo: " + e.getMessage());

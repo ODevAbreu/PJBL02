@@ -6,19 +6,8 @@ public class ArmazenarDadosDeVariavel {
 
     public static void main(String[] args) {
 
-        String nome = "Nome: Prof pedro ";
-        String senha = "Senha: 123" ;
+        new Screen();
 
-
-
-
-        String informacoes = nome + " | " + senha  ;
-
-        // Caminho do arquivo onde os dados serão armazenados
-        String caminhoArquivo = "dados.txt";
-
-        // Chamando o método para salvar os dados no arquivo
-        salvarDadosNoArquivo(caminhoArquivo, informacoes);
     }
 
     // Método para salvar os dados no arquivo
