@@ -17,7 +17,42 @@ public class Banco {
         }
         return null;
     }
+
+    // Método PIX para transferência
+    public boolean realizarPix(int numeroContaOrigem, String senha, int numeroContaDestino, double valor) {
+        // Encontrar conta de origem
+        ContaBancaria contaOrigem = buscarConta(numeroContaOrigem, senha);
+        if (contaOrigem == null) {
+            System.out.println("Conta de origem não encontrada ou senha incorreta.");
+            return false;
+        }
+
+        // Encontrar conta de destino
+        ContaBancaria contaDestino = null;
+        for (ContaBancaria conta : contas) {
+            if (conta.getNumeroDaConta() == numeroContaDestino) {
+                contaDestino = conta;
+                break;
+            }
+        }
+
+        if (contaDestino == null) {
+            System.out.println("Conta de destino não encontrada.");
+            return false;
+        }
+
+        // Validar saldo e realizar transferência
+        if (contaOrigem.sacar(valor)) {
+            contaDestino.depositar(valor);
+            System.out.println("PIX realizado com sucesso!");
+            return true;
+        } else {
+            System.out.println("Saldo insuficiente para realizar o PIX.");
+            return false;
+        }
+    }
 }
+
 
 abstract class ContaBancaria {
     private int numeroDaConta;
@@ -54,13 +89,13 @@ abstract class ContaBancaria {
     public abstract boolean sacar(double valor);
 }
 
-class ContaBancariaPF extends ContaBancaria {
+abstract class ContaBancariaPF extends ContaBancaria {
     public ContaBancariaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
         super(numeroDaConta, senha, saldo, nome, cpf);
     }
 }
 
-class ContaBancariaPJ extends ContaBancaria {
+abstract class ContaBancariaPJ extends ContaBancaria {
     public ContaBancariaPJ(int numeroDaConta, String senha, double saldo, String nome, String cnpj) {
         super(numeroDaConta, senha, saldo, nome, cnpj);
     }
@@ -154,3 +189,37 @@ class ContaPoupancaPJ extends ContaBancariaPJ {
         return false;
     }
 }
+
+class TesteBanco {
+    public static void main(String[] args) {
+        // Criação do banco
+        Banco banco = new Banco("MeuBanco");
+
+        // Criação de duas contas
+        ContaCorrentePF conta1 = new ContaCorrentePF(12345, "senha123", 1000.0, "João Silva", "123.456.789-00");
+        ContaCorrentePF conta2 = new ContaCorrentePF(67890, "senha456", 500.0, "Maria Oliveira", "987.654.321-00");
+
+        // Adicionando contas ao banco
+        banco.contas.add(conta1);
+        banco.contas.add(conta2);
+
+        // Exibindo saldo inicial
+        System.out.println("Saldo inicial de João: " + conta1.getSaldo());
+        System.out.println("Saldo inicial de Maria: " + conta2.getSaldo());
+
+        // Realizando uma transferência PIX
+        boolean pixRealizado = banco.realizarPix(12345, "senha123", 67890, 200.0);
+
+        // Verificando resultado
+        if (pixRealizado) {
+            System.out.println("Transferência PIX realizada com sucesso!");
+        } else {
+            System.out.println("Transferência PIX falhou.");
+        }
+
+        // Exibindo saldo final
+        System.out.println("Saldo final de João: " + conta1.getSaldo());
+        System.out.println("Saldo final de Maria: " + conta2.getSaldo());
+    }
+}
+
