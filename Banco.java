@@ -190,36 +190,5 @@ class ContaPoupancaPJ extends ContaBancariaPJ {
     }
 }
 
-class TesteBanco {
-    public static void main(String[] args) {
-        // Criação do banco
-        Banco banco = new Banco("MeuBanco");
 
-        // Criação de duas contas
-        ContaCorrentePF conta1 = new ContaCorrentePF(12345, "senha123", 1000.0, "João Silva", "123.456.789-00");
-        ContaCorrentePF conta2 = new ContaCorrentePF(67890, "senha456", 500.0, "Maria Oliveira", "987.654.321-00");
-
-        // Adicionando contas ao banco
-        banco.contas.add(conta1);
-        banco.contas.add(conta2);
-
-        // Exibindo saldo inicial
-        System.out.println("Saldo inicial de João: " + conta1.getSaldo());
-        System.out.println("Saldo inicial de Maria: " + conta2.getSaldo());
-
-        // Realizando uma transferência PIX
-        boolean pixRealizado = banco.realizarPix(12345, "senha123", 67890, 200.0);
-
-        // Verificando resultado
-        if (pixRealizado) {
-            System.out.println("Transferência PIX realizada com sucesso!");
-        } else {
-            System.out.println("Transferência PIX falhou.");
-        }
-
-        // Exibindo saldo final
-        System.out.println("Saldo final de João: " + conta1.getSaldo());
-        System.out.println("Saldo final de Maria: " + conta2.getSaldo());
-    }
-}
 
