@@ -44,7 +44,6 @@ public class Screen extends JFrame {
             cadastro_b.setFont(arial);
 
 
-
             login_b.setForeground(laranja);
             login_b.setBackground(branco);
             cadastro_b.setForeground(laranja);
@@ -52,8 +51,6 @@ public class Screen extends JFrame {
 
             add(login_b);
             add(cadastro_b);// colocando o botao no painel |
-
-
 
             login_b.addActionListener(new ActionListener() {
                 @Override
@@ -261,6 +258,16 @@ class FisicaForm extends JFrame {
         JTextField saldo = new JTextField();
         saldo.setBounds(xuser,yuser + 180,180,30);
 
+        JRadioButton corrente = new JRadioButton("Conta Corrente");
+        JRadioButton poupanca = new JRadioButton("Conta Poupança");
+
+        corrente.setBounds(xuser+220,yuser,180,30);
+        poupanca.setBounds(xuser+220,yuser+30,180,30);
+
+        ButtonGroup tipo_conta_f = new ButtonGroup();
+        tipo_conta_f.add(corrente);
+        tipo_conta_f.add(poupanca);
+
         add(usuarioLabel);
         add(user);
         add(cpf_label);
@@ -269,6 +276,8 @@ class FisicaForm extends JFrame {
         add(senha);
         add(saldo_label);
         add(saldo);
+        add(corrente);
+        add(poupanca);
 
         JButton cadastrar = new JButton("Cadastrar");
         cadastrar.setBounds(xuser,yuser + 220, 100, 30);
@@ -283,14 +292,23 @@ class FisicaForm extends JFrame {
                 String tipoconta = "F";
                 double saldo_value = Float.parseFloat((saldo.getText()));
                 int num_conta = (int) (Math.random() * 10000);
+                String tipo_conta_f;
+
+
+                //verificar o tipo da conta juridica
+                if (poupanca.isSelected()) {
+                    tipo_conta_f = "P";
+                } else {
+                    tipo_conta_f = "C";
+                }
+
                 ArmazenarDadosDeVariavel.salvarDadosNoArquivo("dados.txt", tipoconta + " | " + num_conta + " | " + senha_value + " | " + saldo_value + " | " + nome_value + " | " + cpf_value);
                 JOptionPane.showMessageDialog(null,"Cadastro Concluido, numero da sua conta:" + num_conta , "Alerta", JOptionPane.WARNING_MESSAGE);
 
             }
         });
 
-
-        setVisible(true);
+    setVisible(true);
     }
 }
 class JuridicaForm extends JFrame {
@@ -324,7 +342,7 @@ class JuridicaForm extends JFrame {
         cnpj_label.setBounds(xuser,yuser + 60 - 25, 100, 30);
         cnpj_label.setForeground(Color.white);
 
-        JTextField cnpj = new JTextField();
+            JTextField cnpj = new JTextField();
         cnpj.setBounds(xuser,yuser + 60,180,30);
 
 
@@ -343,6 +361,17 @@ class JuridicaForm extends JFrame {
         JTextField saldo = new JTextField();
         saldo.setBounds(xuser,yuser + 180,180,30);
 
+
+        JRadioButton corrente = new JRadioButton("Conta Corrente");
+        JRadioButton poupanca = new JRadioButton("Conta Poupança");
+
+        corrente.setBounds(xuser+220,yuser,180,30);
+        poupanca.setBounds(xuser+220,yuser+30,180,30);
+
+        ButtonGroup tipo_conta_j = new ButtonGroup();
+        tipo_conta_j.add(corrente);
+        tipo_conta_j.add(poupanca);
+
         add(usuarioLabel);
         add(user);
         add(cnpj_label);
@@ -351,6 +380,8 @@ class JuridicaForm extends JFrame {
         add(senha);
         add(saldo_label);
         add(saldo);
+        add(corrente);
+        add(poupanca);
 
         JButton cadastrar = new JButton("Cadastrar");
         cadastrar.setBounds(xuser,yuser + 220, 100, 30);
@@ -363,9 +394,20 @@ class JuridicaForm extends JFrame {
                 String cnpj_value = cnpj.getText();
                 String senha_value = senha.getText();
                 String tipoconta = "J";
+                String tipo_conta_j;
+
+                //verificar o tipo da conta juridica
+                if (poupanca.isSelected()) {
+                    tipo_conta_j = "P";
+                } else {
+                    tipo_conta_j = "C";
+                }
+
+
                 float saldo_value = Float.parseFloat((saldo.getText()));
                 int num_conta = (int) (Math.random() * 10000);
-                ArmazenarDadosDeVariavel.salvarDadosNoArquivo("dados.txt", tipoconta + " | " + num_conta + " | " + senha_value + " | " + saldo_value + " | " + nome_value + " | " + cnpj_value);
+                ArmazenarDadosDeVariavel.salvarDadosNoArquivo("dados.txt",
+                        tipoconta + " | " + num_conta + " | " + senha_value + " | " + saldo_value + " | " + nome_value + " | " + cnpj_value + " | " + tipo_conta_j );
                 JOptionPane.showMessageDialog(null,"Cadastro Concluido, numero da sua conta:" + num_conta , "Alerta", JOptionPane.WARNING_MESSAGE);
 
             }
@@ -397,12 +439,20 @@ class App extends JFrame{
 
         String nome = conta.getNome();
         Double saldo = conta.getSaldo();
+        String tipo_acc = conta.getTipo();
+
 
         JLabel nomeLabel = new JLabel("Bem-vindo(a), " + nome + "!");
         nomeLabel.setBounds(50, 50, 300, 30);
         nomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
         nomeLabel.setForeground(Color.WHITE);
         add(nomeLabel);
+
+        JLabel infoinit = new JLabel(tipo_acc);
+        infoinit.setBounds(10, 10, 300, 30);
+        infoinit.setFont(new Font("Arial", Font.BOLD, 20));
+        infoinit.setForeground(Color.WHITE);
+        add(infoinit);
 
         JLabel saldoLabel = new JLabel("Saldo: " + saldo + "!");
         saldoLabel.setBounds(50, 85, 300, 30);

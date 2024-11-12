@@ -12,22 +12,34 @@ public class LerDadosDeTxt {
                 String[] partes = linha.split("\\|");
 
                 if (partes.length >= 6) {
+
                     String tipoConta = partes[0].trim();
                     int numConta = Integer.parseInt(partes[1].trim());
                     String senha = partes[2].trim();
                     double saldo = Double.parseDouble(partes[3].trim());
                     String nome = partes[4].trim();
                     String cpfOuCnpj = partes[5].trim();
+                    String P_ou_C = partes[6].trim();
 
-                    ContaBancaria conta = null;
                     if ("F".equals(tipoConta)) {
-                        conta = new ContaCorrentePF(numConta, senha, saldo, nome, cpfOuCnpj);
-                    } else if ("J".equals(tipoConta)) {
-                        conta = new ContaCorrentePJ(numConta, senha, saldo, nome, cpfOuCnpj);
-                    }
-                    if (conta != null) {
+                        if (P_ou_C == String.valueOf('C')) {
+                            ContaCorrentePF conta = new ContaCorrentePF(numConta, senha, saldo, nome, cpfOuCnpj);
                             banco.contas.add(conta);
+                        }else{
+                            ContaPoupancaPF conta = new ContaPoupancaPF(numConta, senha, saldo, nome, cpfOuCnpj);
+                            banco.contas.add(conta);
+                        }
+
+                    } else if ("J".equals(tipoConta)) {
+                        if (P_ou_C == String.valueOf('C')) {
+                            ContaCorrentePJ conta = new ContaCorrentePJ(numConta, senha, saldo, nome, cpfOuCnpj);
+                            banco.contas.add(conta);
+                        }else{
+                            ContaPoupancaPJ conta = new ContaPoupancaPJ(numConta, senha, saldo, nome, cpfOuCnpj);
+                            banco.contas.add(conta);
+                        }
                     }
+
                 }
             }
         } catch (IOException e) {

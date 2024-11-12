@@ -8,6 +8,7 @@ public class ArmazenarDadosDeVariavel {
 
         new Screen();
 
+
     }
 
     // Método para salvar os dados no arquivo

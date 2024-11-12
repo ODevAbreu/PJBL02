@@ -16,6 +16,8 @@ public class Banco {
             }
         }
         return null;
+
+
     }
 
     // Método PIX para transferência
@@ -87,12 +89,14 @@ abstract class ContaBancaria {
     }
 
     public abstract boolean sacar(double valor);
+    public abstract String getTipo();
 }
 
 abstract class ContaBancariaPF extends ContaBancaria {
     public ContaBancariaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
         super(numeroDaConta, senha, saldo, nome, cpf);
     }
+    public abstract String getTipo();
 }
 
 abstract class ContaBancariaPJ extends ContaBancaria {
@@ -104,6 +108,10 @@ abstract class ContaBancariaPJ extends ContaBancaria {
 class ContaCorrentePF extends ContaBancariaPF {
     public ContaCorrentePF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
         super(numeroDaConta, senha, saldo, nome, cpf);
+    }
+    @Override
+    public String getTipo() {
+        return "Tipo da Conta PF: Corrente";
     }
 
     @Override
@@ -119,6 +127,11 @@ class ContaCorrentePF extends ContaBancariaPF {
 class ContaPoupancaPF extends ContaBancariaPF {
     public ContaPoupancaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
         super(numeroDaConta, senha, saldo, nome, cpf);
+    }
+
+    @Override
+    public String getTipo() {
+        return "Tipo da Conta PF: Poupança";
     }
 
     @Override
@@ -151,6 +164,11 @@ class ContaCorrentePJ extends ContaBancariaPJ {
     }
 
     @Override
+    public String getTipo() {
+        return "Tipo da Conta PJ: Corrente";
+    }
+
+    @Override
     public boolean depositar(double valor) {
         if (valor > TAXA_DEPOSITO) {
             saldo += (valor - TAXA_DEPOSITO);
@@ -168,6 +186,10 @@ class ContaPoupancaPJ extends ContaBancariaPJ {
     public ContaPoupancaPJ(int numeroDaConta, String senha, double saldo, String nome, String cnpj) {
         super(numeroDaConta, senha, saldo, nome, cnpj);
         this.saquesRealizados = 0;
+    }
+    @Override
+    public String getTipo() {
+        return "Tipo da Conta PJ: Poupança";
     }
 
     @Override
