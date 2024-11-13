@@ -4,6 +4,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class Screen extends JFrame {
     public Screen() {
@@ -69,9 +75,9 @@ public class Screen extends JFrame {
             setVisible(true);
     }
 
-//    public static void main(String[] args) {
-//        new Screen();
-//    }
+   public static void main(String[] args) {
+      new Screen();
+    }
 }
 
 
@@ -120,7 +126,6 @@ class LoginForm extends JFrame {
             login.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    //integrar a parti daqui
                     Banco banco = new Banco("Itau");
                     String caminhoArquivo = "dados.txt";
                     LerDadosDeTxt.lerDadosDoArquivo(caminhoArquivo, banco);
@@ -129,20 +134,21 @@ class LoginForm extends JFrame {
                     String pass = senha.getText();
                     int numconta = Integer.parseInt(login);
 
-                    ContaBancaria contaAutenticada = banco.buscarConta(numconta, pass);
+                    try {
+                        ContaBancaria contaAutenticada = banco.buscarConta(numconta, pass);
 
-                    if (contaAutenticada != null) {
-                        dispose();
-                        new App(contaAutenticada);
-                        //JOptionPane.showMessageDialog(null,"Login realizado com sucesso!", "lOGIN", JOptionPane.INFORMATION_MESSAGE);
-
-                    } else {
-                        System.out.println(numconta);
-                        System.out.println(pass);
-                        JOptionPane.showMessageDialog(null,"Login ou senha incorretos.", "erro", JOptionPane.WARNING_MESSAGE);
+                        if (contaAutenticada != null) {
+                            dispose();
+                            new App(contaAutenticada);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Conta não encontrada.", "Erro", JOptionPane.WARNING_MESSAGE);
+                        }
+                    } catch (Banco.SenhaInvalidaException ex) {
+                        JOptionPane.showMessageDialog(null, "Senha inválida. Verifique a senha e tente novamente.", "Erro de Autenticação", JOptionPane.WARNING_MESSAGE);
                     }
                 }
             });
+
 
             setVisible(true);
         }
@@ -420,9 +426,11 @@ class JuridicaForm extends JFrame {
 }
 class App extends JFrame{
     private ContaBancaria conta;
+    private Banco banco;
 
     public App(ContaBancaria conta) {
         this.conta = conta;
+        this.banco = banco;
 
         int comprimento_painel = 910;
         int altura_painel = 610;
@@ -491,6 +499,25 @@ class App extends JFrame{
                 new Depositar(conta);
             }
         });
+
+        JButton pix = new JButton("PIX");
+        pix.setBounds(50, 250, 150, 50);
+        pix.setFont(arial);
+        pix.setForeground(laranja);
+        pix.setBackground(Color.white);
+        add(pix);
+
+        pix.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Chama a tela de PIX e torna-a visível
+                PIXForm form = new PIXForm(banco, conta);  // Cria a nova instância do formulário PIX
+                form.setVisible(true);  // Exibe a tela de PIX
+            }
+        });
+
+
+
 
         // pagina dps de logar, identificar o tipo da conta e escrever no dados.txt quando sacar e depositar.
         //JOptionPane.showMessageDialog(null,conta.getNome(), "ola", JOptionPane.WARNING_MESSAGE);
@@ -601,5 +628,114 @@ class Depositar extends JFrame{
         add(new JLabel("Conta Poupança Juridica tem um limite de 3 saques"));
         setVisible(true);
     }
-
 }
+
+
+class PIXForm extends JFrame {
+
+    public PIXForm(Banco banco, ContaBancaria contaOrigem) {
+        setTitle("Transferir via PIX");
+        setSize(350, 250);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new FlowLayout());
+
+        // Campo de entrada para o número da conta de origem (do usuário)
+        JTextField contaOrigemField = new JTextField(15);
+        contaOrigemField.setText(String.valueOf(contaOrigem.getNumeroDaConta()));
+        contaOrigemField.setEditable(false);  // Não permite editar o número da conta de origem
+
+        // Campo de entrada para a senha da conta de origem
+        JPasswordField senhaField = new JPasswordField(15);
+
+        // Campo de entrada para o número da conta de destino
+        JTextField contaDestinoField = new JTextField(15);
+
+        // Campo de entrada para o valor da transferência
+        JTextField valorField = new JTextField(10);
+        valorField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                String text = valorField.getText();
+
+                // Permitir apenas números e ponto decimal
+                if (!Character.isDigit(c) && c != '.' || (c == '.' && text.contains("."))) {
+                    e.consume();
+                }
+            }
+        });
+
+        // Botão para realizar a transferência via PIX
+        JButton transferirButton = new JButton("Transferir via PIX");
+        transferirButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Banco banco = new Banco("itau");
+                try {
+                    // Captura os valores inseridos pelo usuário
+                    int numeroContaOrigem = Integer.parseInt(contaOrigemField.getText());  // Número da conta de origem
+                    String senha = new String(senhaField.getPassword());  // Senha inserida pelo usuário
+                    int numeroContaDestino = Integer.parseInt(contaDestinoField.getText());  // Número da conta de destino
+                    double valor = Double.parseDouble(valorField.getText());  // Valor a ser transferido
+
+                    // Buscar a conta de destino no banco (sem a senha)
+                    ContaBancaria contaDestino = banco.buscarContaPIX(numeroContaDestino);  // Usando o método que você criou
+                    if (contaDestino == null) {
+                        JOptionPane.showMessageDialog(PIXForm.this, "Conta de destino não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Validar a senha da conta de origem
+                    if (contaOrigem.validarSenha(senha)) {
+                        boolean sucesso = contaOrigem.realizarPix(contaDestino, valor);
+
+                        if (sucesso) {
+                            // Registrar a transferência no arquivo
+                            registrarTransferencia(numeroContaOrigem, numeroContaDestino, valor);
+                            JOptionPane.showMessageDialog(PIXForm.this, "Transferência de R$" + valor + " realizada com sucesso!");
+                        } else {
+                            JOptionPane.showMessageDialog(PIXForm.this, "Falha ao realizar a transferência.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(PIXForm.this, "Senha inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(PIXForm.this, "Por favor, insira valores válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // Adiciona os componentes à tela
+        add(new JLabel("Conta de Origem:"));
+        add(contaOrigemField);
+        add(new JLabel("Senha:"));
+        add(senhaField);
+        add(new JLabel("Conta de Destino:"));
+        add(contaDestinoField);
+        add(new JLabel("Valor:"));
+        add(valorField);
+        add(transferirButton);
+    }
+
+    // Método para registrar as transferências em um arquivo
+    private void registrarTransferencia(int numeroContaOrigem, int numeroContaDestino, double valor) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("dados.txt", true))) {
+            // Formato de linha: data da transferência | conta origem | conta destino | valor transferido
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            String data = sdf.format(new Date());
+            writer.write("Data: " + data + " | Conta Origem: " + numeroContaOrigem + " | Conta Destino: " + numeroContaDestino + " | Valor: R$" + valor);
+            writer.newLine();  // Adiciona uma nova linha após a transferência
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+
+

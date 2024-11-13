@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 
 public class Banco {
@@ -7,16 +8,32 @@ public class Banco {
     public Banco(String nome) {
         this.nome = nome;
         this.contas = new ArrayList<>();
+        carregarContas();
     }
 
-    public ContaBancaria buscarConta(int numeroDaConta, String senha) {
+    public class SenhaInvalidaException extends Exception {
+        public SenhaInvalidaException() {
+            super("Senha inválida. Verifique a senha e tente novamente.");
+        }
+
+        public SenhaInvalidaException(String message) {
+            super(message);
+        }
+    }
+
+    public ContaBancaria buscarConta(int numeroDaConta, String senha) throws SenhaInvalidaException {
         for (ContaBancaria conta : contas) {
-            if (conta.getNumeroDaConta() == numeroDaConta && conta.validarSenha(senha)) {
-                return conta;
+            if (conta.getNumeroDaConta() == numeroDaConta) {
+                if (conta.validarSenha(senha)) {
+                    return conta; // Retorna a conta caso a senha esteja correta
+                } else {
+                    throw new SenhaInvalidaException("Senha inválida. Verifique a senha e tente novamente.");
+                }
             }
         }
-        return null;
+        return null; // Retorna null se a conta não for encontrada
     }
+
     public ContaBancaria buscarContaPIX(int numeroDaConta) {
         for (ContaBancaria conta : contas) {
             if (conta.getNumeroDaConta() == numeroDaConta) {
@@ -26,42 +43,33 @@ public class Banco {
         return null;
     }
 
-    public boolean realizarPix(int numeroContaOrigem, String senha, int numeroContaDestino, double valor) {
-        // Encontrar conta de origem
-        ContaBancaria contaOrigem = buscarContaPIX(numeroContaOrigem);
-        if (contaOrigem == null) {
-            System.out.println("Conta de origem não encontrada ou senha incorreta.");
-            return false;
+    // Método para salvar as contas em um arquivo
+    public void salvarContas() {
+        try (FileOutputStream fileOut = new FileOutputStream("contas.ser");
+             ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+            out.writeObject(contas); // Serializa a lista de contas
+            System.out.println("Contas salvas com sucesso.");
+        } catch (IOException i) {
+            i.printStackTrace();
         }
+    }
 
-
-        ContaBancaria contaDestino = null;
-        for (ContaBancaria conta : contas) {
-            if (conta.getNumeroDaConta() == numeroContaDestino) {
-                contaDestino = conta;
-                break;
-            }
-        }
-
-        if (contaDestino == null) {
-            System.out.println("Conta de destino não encontrada.");
-            return false;
-        }
-
-
-        if (contaOrigem.sacar(valor)) {
-            contaDestino.depositar(valor);
-            System.out.println("PIX realizado com sucesso!");
-            return true;
-        } else {
-            System.out.println("Saldo insuficiente para realizar o PIX.");
-            return false;
+    // Método para carregar as contas de um arquivo
+    @SuppressWarnings("unchecked")
+    public void carregarContas() {
+        try (FileInputStream fileIn = new FileInputStream("contas.ser");
+             ObjectInputStream in = new ObjectInputStream(fileIn)) {
+            contas = (ArrayList<ContaBancaria>) in.readObject(); // Desserializa a lista de contas
+            System.out.println("Contas carregadas com sucesso.");
+        } catch (IOException | ClassNotFoundException e) {
+            contas = new ArrayList<>(); // Inicia uma nova lista se não houver arquivo
+            System.out.println("Nenhuma conta existente encontrada. Nova lista de contas criada.");
         }
     }
 }
 
-
-abstract class ContaBancaria {
+abstract class ContaBancaria implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int numeroDaConta;
     private String senha;
     protected double saldo;
@@ -79,13 +87,20 @@ abstract class ContaBancaria {
     public int getNumeroDaConta() { return numeroDaConta; }
     public String getNome() { return nome; }
     public double getSaldo() { return saldo; }
-    public String getSenha() {return senha;}
-    public String getCpf() {return cpf;}
+    public String getSenha() { return senha; }
+    public String getCpf() { return cpf; }
+
+    public void setSaldo(double saldo) {
+        if (saldo >= 0) {
+            this.saldo = saldo;
+        } else {
+            System.out.println("Saldo não pode ser negativo.");
+        }
+    }
 
     public boolean validarSenha(String senha) {
         return this.senha.equals(senha);
     }
-
 
     public boolean depositar(double valor) {
         if (valor > 0) {
@@ -97,7 +112,26 @@ abstract class ContaBancaria {
 
     public abstract boolean sacar(double valor);
     public abstract String getTipo();
+
+    public boolean realizarPix(ContaBancaria destino, double valor) {
+        if (valor <= 0) {
+            System.out.println("Valor de transferência deve ser maior que zero.");
+            return false;
+        }
+        if (this.saldo < valor) {
+            System.out.println("Saldo insuficiente para realizar o PIX.");
+            return false;
+        }
+
+        this.saldo -= valor;
+        destino.saldo += valor;
+
+        System.out.println("PIX realizado com sucesso!");
+        return true;
+    }
 }
+
+
 
 abstract class ContaBancariaPF extends ContaBancaria {
     public ContaBancariaPF(int numeroDaConta, String senha, double saldo, String nome, String cpf) {
