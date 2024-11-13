@@ -18,7 +18,6 @@ public class Banco {
         return null;
     }
 
-    // Método PIX para transferência
     public boolean realizarPix(int numeroContaOrigem, String senha, int numeroContaDestino, double valor) {
         // Encontrar conta de origem
         ContaBancaria contaOrigem = buscarConta(numeroContaOrigem, senha);
@@ -27,7 +26,7 @@ public class Banco {
             return false;
         }
 
-        // Encontrar conta de destino
+
         ContaBancaria contaDestino = null;
         for (ContaBancaria conta : contas) {
             if (conta.getNumeroDaConta() == numeroContaDestino) {
@@ -41,7 +40,7 @@ public class Banco {
             return false;
         }
 
-        // Validar saldo e realizar transferência
+
         if (contaOrigem.sacar(valor)) {
             contaDestino.depositar(valor);
             System.out.println("PIX realizado com sucesso!");
