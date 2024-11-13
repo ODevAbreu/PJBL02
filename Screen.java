@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Screen extends JFrame {
     public Screen() {
@@ -459,7 +461,145 @@ class App extends JFrame{
         saldoLabel.setFont(new Font("Arial", Font.BOLD, 20));
         saldoLabel.setForeground(Color.white);
         add(saldoLabel);
+
+        JButton sacar = new JButton("Sacar");// instancia do botao
+
+        sacar.setBounds(50,120,150,50);
+
+        Font arial = new Font("Arial",Font.BOLD,20);
+        sacar.setFont(arial);
+
+        sacar.setForeground(laranja);sacar.setBackground(Color.white);
+        add(sacar);
+        sacar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Sacar(conta);
+            }
+        });
+        JButton depositar = new JButton("Depositar");
+
+        depositar.setBounds(50,185,150,50);
+
+        depositar.setFont(arial);
+
+        depositar.setForeground(laranja);depositar.setBackground(Color.white);
+        add(depositar);
+        depositar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Depositar(conta);
+            }
+        });
+
         // pagina dps de logar, identificar o tipo da conta e escrever no dados.txt quando sacar e depositar.
         //JOptionPane.showMessageDialog(null,conta.getNome(), "ola", JOptionPane.WARNING_MESSAGE);
     }
+}
+class Sacar extends JFrame{
+    public Sacar(ContaBancaria conta) {
+
+        setTitle("Sacar");
+        setSize(350, 175);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new FlowLayout());
+
+        // Campo de entrada que aceita apenas números de ponto flutuante
+        JTextField floatInputField = new JTextField(10);
+         floatInputField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                String text = floatInputField.getText();
+
+                // Permitir apenas dígitos, ponto decimal e sinal de menos no início
+                if (!Character.isDigit(c) && c != '.' && c != '-' || (c == '.' && text.contains("."))
+                        || (c == '-' && text.length() > 0)) {
+                    e.consume();
+                }
+            }
+        });
+
+        // Botão "Sacar"
+       JButton sacarButton = new JButton("Sacar");
+        sacarButton.addActionListener(e -> {
+            try {
+                float saque = Float.parseFloat(floatInputField.getText());
+                boolean sacou = conta.sacar(saque);
+                if (sacou){
+                    JOptionPane.showMessageDialog(this, "Valor retirado: R$" + saque);
+                }else{
+                    JOptionPane.showMessageDialog(this, "Erro ao sacar : R$" + saque );
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Insira um número válido!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        add(new JLabel("Digite um valor:"));
+
+        add(floatInputField);
+        add(sacarButton);
+        add(new JLabel("Conta Corrente Fisica não tem restrições"));
+        add(new JLabel("Conta Poupança Fisica tem o valor minimo de R$50.00"));
+        add(new JLabel("Conta Corrente Juridica tem uma taxa de R$ 05.00"));
+        add(new JLabel("Conta Poupança Juridica tem um limite de 3 saques"));
+        setVisible(true);
+    }
+
+}
+class Depositar extends JFrame{
+    public Depositar(ContaBancaria conta) {
+
+        setTitle("Depositar");
+        setSize(350, 175);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new FlowLayout());
+
+        // Campo de entrada que aceita apenas números de ponto flutuante
+        JTextField floatInputField = new JTextField(10);
+        floatInputField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                String text = floatInputField.getText();
+
+                // Permitir apenas dígitos, ponto decimal e sinal de menos no início
+                if (!Character.isDigit(c) && c != '.' && c != '-' || (c == '.' && text.contains("."))
+                        || (c == '-' && text.length() > 0)) {
+                    e.consume();
+                }
+            }
+        });
+
+        JButton depositarBtn = new JButton("Depositar");
+        depositarBtn.addActionListener(e -> {
+            try {
+                float deposito = Float.parseFloat(floatInputField.getText());
+                boolean depositou = conta.depositar(deposito);
+                if (depositou){
+                    JOptionPane.showMessageDialog(this, "Valor depositado: R$" + deposito);
+                }else{
+                    JOptionPane.showMessageDialog(this, "Erro ao depositar : R$" + deposito );
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Insira um número válido!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        add(new JLabel("Digite um valor:"));
+
+        add(floatInputField);
+        add(depositarBtn);
+        add(new JLabel("Conta Corrente Fisica não tem restrições"));
+        add(new JLabel("Conta Poupança Fisica tem o valor minimo de R$50.00"));
+        add(new JLabel("Conta Corrente Juridica tem uma taxa de R$ 05.00"));
+        add(new JLabel("Conta Poupança Juridica tem um limite de 3 saques"));
+        setVisible(true);
+    }
+
 }
